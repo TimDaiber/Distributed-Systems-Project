@@ -6,9 +6,7 @@ import java.rmi.RemoteException;
 
 public interface StringService extends Remote, Serializable
 {
-	
-	
-	
+
 	public String getMessage() throws RemoteException;
 	
 }

@@ -16,7 +16,7 @@ public class Call implements Callable {
 		this.algo = algo;
 		this.jobN = jobN;
 	}
-
+	// creating getters and setters
 	@Override
 	public String getEntry1() {
 		// TODO Auto-generated method stub

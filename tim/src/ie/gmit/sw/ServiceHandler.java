@@ -11,9 +11,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 public class ServiceHandler extends HttpServlet {
-	/**
-	 * 
-	 */
+	// set private variables
 	private static final long serialVersionUID = 1L;
 	private String remoteHost = null;
 	private static long jobNumber = 0;
@@ -31,11 +29,7 @@ public class ServiceHandler extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.setContentType("text/html");
 		PrintWriter out = resp.getWriter();
-		
-		
-		
-		
-		
+	
 		
 		//Initialise some request varuables with the submitted form info. These are local to this method and thread safe...
 		String algorithm = req.getParameter("cmbAlgorithm");
@@ -48,28 +42,36 @@ public class ServiceHandler extends HttpServlet {
 		out.print("</head>");		
 		out.print("<body>");
 		
+		// creates instances of taskNumberCreator
 		creatable taskNumb= new taskNumberCreator();
+		// creates task number
 		taskNumb.createNumber();
+		//sets jobNumber to created task number
 		jobNumber = taskNumb.getTaskNumber();
 		
+		// checks if task number is null
 		if (taskNumber == null) {
+			// if null set taskNumber
 			taskNumber = new String("T" + jobNumber);
 			// jobNumber++;
+			// initializes new call using constructor 
 			call = new Call(s, t, algorithm, taskNumber);
 
 			// Blocking queue information
 			// http://tutorials.jenkov.com/java-util-concurrent/blockingqueue.html
 			
-			// add a call to linked blocking queue
+			// adds a call to linked blocking queue
 			queue.addcalltoqueue(call);
 			
 			
 		} else {
 			// Check out-queue for finished job
 		}
-		
+		// checks if is empty
 		if(!queue.isQueueEmpty()){
+			// if queue not empty create new pool
 			mypool = new mypool();
+			// compares strings
 			mypool.compareStrings(queue, result);
 		}
 		 // http://tutorials.jenkov.com/java-util-concurrent/blockingqueue.html
@@ -127,8 +129,11 @@ public class ServiceHandler extends HttpServlet {
 		out.print("<input name=\"txtT\" type=\"hidden\" value=\"" + t + "\">");
 		out.print("<input name=\"frmTaskNumber\" type=\"hidden\" value=\"" + taskNumber + "\">");
 		out.print("</form>");
+		// creates new blocking queue what equals the values of the old blocking queue
 		BlockingQueue<Callable> q = queue.getQueue();
+		// chacks if size is greater then 0
 		if(q.size() > 0){
+			// gets job number of each item
 			for(Callable item : q){
 				out.print("<LI>Job Number ==> " + item.getJobNumber() + "</LI>");
 			}
@@ -144,17 +149,15 @@ public class ServiceHandler extends HttpServlet {
 		out.print("<script>");
 		out.print("var wait=setTimeout(\"document.frmRequestDetails.submit();\", 10000);");
 		out.print("</script>");
-		
+		// checks if result is empty and result if its available
 		if(!result.isResultsEmpty() && result.isResultReady(taskNumber)){
 			out.print("<h3>Request is here:</h3>");
+			// gets the result 
 			out.print("<p style=\"font-size: 36px; font-weight: bold\">" + result.takeResult(taskNumber).getResult() + "</p>");
 		}
 	}
 		
 				
-		//You can use this method to implement the functionality of an RMI client
-		
-		//
 	
 
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
