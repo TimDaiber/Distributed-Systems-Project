@@ -19,6 +19,8 @@ public class ServiceHandler extends HttpServlet {
 	private static long jobNumber = 0;
 	private Callable call;
 	private StringService strS;
+	private static Result result = new Result();
+	private mypool mypool;
 	//private BlockingQueue<Callable> queue = new LinkedBlockingQueue<Callable>();
 	private static callqueue queue =new callqueue();
 	public void init() throws ServletException {
@@ -50,15 +52,25 @@ public class ServiceHandler extends HttpServlet {
 		taskNumb.createNumber();
 		jobNumber = taskNumb.getTaskNumber();
 		
-		if (taskNumber == null){
+		if (taskNumber == null) {
 			taskNumber = new String("T" + jobNumber);
-			//jobNumber++;
-			 call = new Call(s,t,algorithm,taskNumber);
-			 
-			 queue.addcalltoqueue(call);
-			//Add job to in-queue
-		}else{
-			//Check out-queue for finished job
+			// jobNumber++;
+			call = new Call(s, t, algorithm, taskNumber);
+
+			// Blocking queue information
+			// http://tutorials.jenkov.com/java-util-concurrent/blockingqueue.html
+			
+			// add a call to linked blocking queue
+			queue.addcalltoqueue(call);
+			
+			
+		} else {
+			// Check out-queue for finished job
+		}
+		
+		if(!queue.isQueueEmpty()){
+			mypool = new mypool();
+			mypool.compareStrings(queue, result);
 		}
 		 // http://tutorials.jenkov.com/java-util-concurrent/blockingqueue.html
 		
@@ -70,6 +82,16 @@ public class ServiceHandler extends HttpServlet {
 		//}
 			
 		
+		///////////////////////RMI test /////////////////////////////
+		// try {
+		// strS = (StringService)
+		// Naming.lookup("rmi://localhost:1099/compareStrings");
+		// } catch (NotBoundException e) {
+		// }
+		// Get simple message
+		// String RMI_Message = strS.getMessage();
+		// out.print("RMI test"+ RMI_Message);
+		/////////////////////// RMI test End ///////////////////////////////////
 		
 		// Get simple message
 		//String RMI_Message = strS.getMessage();
@@ -104,18 +126,36 @@ public class ServiceHandler extends HttpServlet {
 		out.print("<input name=\"txtS\" type=\"hidden\" value=\"" + s + "\">");
 		out.print("<input name=\"txtT\" type=\"hidden\" value=\"" + t + "\">");
 		out.print("<input name=\"frmTaskNumber\" type=\"hidden\" value=\"" + taskNumber + "\">");
-		out.print("</form>");								
+		out.print("</form>");
+		BlockingQueue<Callable> q = queue.getQueue();
+		if(q.size() > 0){
+			for(Callable item : q){
+				out.print("<LI>Job Number ==> " + item.getJobNumber() + "</LI>");
+			}
+		}
+		else{
+			out.print("<LI>Queue is empty now.</LI>");
+		}
+		out.print("</OL>");
+		
 		out.print("</body>");	
 		out.print("</html>");	
 		
 		out.print("<script>");
 		out.print("var wait=setTimeout(\"document.frmRequestDetails.submit();\", 10000);");
 		out.print("</script>");
+		
+		if(!result.isResultsEmpty() && result.isResultReady(taskNumber)){
+			out.print("<h3>Request is here:</h3>");
+			out.print("<p style=\"font-size: 36px; font-weight: bold\">" + result.takeResult(taskNumber).getResult() + "</p>");
+		}
+	}
+		
 				
 		//You can use this method to implement the functionality of an RMI client
 		
 		//
-	}
+	
 
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		doGet(req, resp);

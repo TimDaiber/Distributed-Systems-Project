@@ -14,5 +14,8 @@ public class callqueue {
 			System.out.println(e.getMessage());
 		}
 	}
+	public int getSize(){
+		return this.queue.size();
+	}
 	
 }

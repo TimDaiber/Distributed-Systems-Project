@@ -67,7 +67,10 @@ public class ServiceHandler extends HttpServlet {
 			// Check out-queue for finished job
 		}
 		
-
+		if(!queue.isQueueEmpty()){
+			mypool = new mypool();
+			jobPool.compareStrings(queue, results);
+		}
 		///////////////////////RMI test /////////////////////////////
 		// try {
 		// strS = (StringService)
